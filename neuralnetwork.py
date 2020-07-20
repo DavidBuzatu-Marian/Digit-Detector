@@ -24,6 +24,11 @@ class NeuralNetwork:
             a = self.activation(z)
         return a
 
+    def print_accuracy(self, images, labels):
+        predictions = self.predict(images)
+        num_correct = sum([np.argmax(a) == np.argmax(b)  for a,b in zip(predictions, labels)])
+        print('{0}/{1} accuracy: {2}%'.format(num_correct, len(images), (num_correct / len(images) * 100)) )
+
     # activation function
     # use a sigmoid function 
     @staticmethod
