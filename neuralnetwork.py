@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 class NeuralNetwork:
 
@@ -52,6 +53,25 @@ class NeuralNetwork:
                 else:
                     print "Epoch {0} complete".format(j)
 
+
+    # update_mini_batch
+    # method used to run a single iteration of gradient descent on the provided batch
+    def update_mini_batch(self, mini_batch, learning_rate):
+        len_mini_batch = len(mini_batch)
+
+        # create new matrices for the new layer of neurons
+        new_w = [np.zeros(weight.shape) for weight in self.weights]
+        new_b = [np.zeros(bias.shape) for bias in self.biases]
+
+        for X, y in mini_batch:
+            # get the updated weight and biases
+            delta_new_w, delta_new_b = self.backprop(X,y)
+            # update weights and biases with the results of backprop
+            new_w = [nw + d_nw for nw, d_nw in zip(new_w, delta_new_w)]
+            new_b = [nb + d_nb for nb, d_b in zip(new_b, delta_new_b)]
+        # update weights and biases based on result of backprop on mini batch
+        self.weights = [w - (learning_rate / len_mini_batch) * nw for w, nw in zip(self.weights, new_w)]
+        self.biases = [b - (learning_rage / len_mini_batch * nb for b, nb in zip(self.biases, new_b))]
 
     def print_accuracy(self, images, labels):
         predictions = self.predict(images)
