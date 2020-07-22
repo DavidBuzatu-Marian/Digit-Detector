@@ -44,14 +44,15 @@ class NeuralNetwork:
             for j in range(epochs):
                 random.shuffle(training_data)
                 mini_batches = [
-                    training_data[k:k + mini_batch_size for k in range(0, size_of_training, mini_batch_size)]
+                    training_data[k:k + mini_batch_size]
+                    for k in range(0, size_of_training, mini_batch_size)
                 ]
                 for mini_batch in mini_batches:
                     self.update_mini_batch(mini_batch, learning_rate)
                 if test_data:
-                    print "Epoch {0}: {1} / {2}".format(j, self.evaluate(test_data), nr_test)
+                    print("Epoch {0}: {1} / {2}".format(j, self.evaluate(test_data), nr_test))
                 else:
-                    print "Epoch {0} complete".format(j)
+                    print("Epoch {0} complete".format(j))
 
 
     # update_mini_batch
