@@ -18,7 +18,6 @@ class NeuralNetwork:
         self.weights = [np.random.randn(s[0], s[1]) for s in weight_dims]
         # self.biases = [np.zeros((s, 1)) for s in layer_sizes[1:]]
         self.biases = [np.random.randn(s, 1) for s in layer_sizes[1:]]
-        print(self.weights[0])
 
     # predict function
     # get the matrix a as a parameter
@@ -28,7 +27,7 @@ class NeuralNetwork:
     def predict(self, a):
         for weight, bias in zip(self.weights, self.biases):
             z = np.matmul(weight, a) + bias
-            a = self.activation(z)
+            a = self.sigmoid(z)
         return a
 
     # SGD method
@@ -79,8 +78,54 @@ class NeuralNetwork:
         num_correct = sum([np.argmax(a) == np.argmax(b)  for a,b in zip(predictions, labels)])
         print('{0}/{1} accuracy: {2}%'.format(num_correct, len(images), (num_correct / len(images) * 100)) )
 
+    # backprop function
+    # steps:
+    # 1. calculate the activation of all layers (forward prop.)
+    # 2. compute delta of last layer (delta[L])
+    # 3. compute intermediary delta (delta[L - 1], delta[L - 2], etc.)
+    # 4. compute Deltas using delta and activation of layers
+    # 5. update weight and bias
+    def backprop(self, X, y):
+        # init weights and biases to zero
+        new_w = [np.zeros(w.shape) for w in self.weights]
+        new_b = [np.zeros(b.shape) for b in self.biases]
+
+        # feedforward part
+        activation = X # initialize to X
+        activation_results = [X] # an array because we have N layers of activations
+        z_results = [] # an array for all z's in layers
+
+        for weight, bias in zip(self.weights, self.biases):
+            z = np.dot(weight, activation) + bias
+            z_results.append(z) # append z to list of z's
+            activation = sigmoid(z) # compute activation
+            activation_results.append(activation) # append to list of activations
+        
+        # backward part
+        delta = (activation_results[-1] - y) * sigmoid_d(zs[-1])
+        new_b[-1] = delta # last layer of bias becomes delta
+        new_w[-1] = compute_weights(delta, activation_results[-2].transpose()) # compute the last layer of weights
+
+        for L in range(2, self.nr_layers):
+            # compute delta and update weight and bias for each layer
+            z = z_results[-L]
+            z_d = sigmoid_d(z)
+            delta = np.dot(self.weights[-L + 1].transpose(), delta) * z_d
+            new_b[-L] = delta
+            new_w[-L] = compute_weights(delta, activation_results[-L - 1].transpose())
+        return (new_w, new_b)
+
+
+
+
+    def compute_weights(delta, activation_results):
+        return np.dot(delta, activation_results)
+
     # activation function
     # use a sigmoid function 
-    @staticmethod
-    def activation(x):
+    def sigmoid(self, x):
         return 1 / (1 + np.exp(-x))
+
+    # derivative of sigmoid
+    def sigmoid_d(self, z):
+        return sigmoid(z) * (1 - sigmoid(z))
